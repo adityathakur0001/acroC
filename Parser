@@ -1,0 +1,682 @@
+#include <iostream>
+#include <vector>
+#include <regex>
+
+using namespace std;
+
+class TreeNode {
+    // Define TreeNode class as needed
+};
+
+class ThreeAddressCode {
+    // Define ThreeAddressCode class as needed
+};
+
+class SymbolTable {
+    // Define SymbolTable class as needed
+};
+
+int temp_counter = 0;
+int label_counter = 0;
+
+ThreeAddressCode ThreeAddrCode;
+SymbolTable SymbolTable;
+
+string tempGen() {
+    return "temp_" + to_string(temp_counter++);
+}
+
+string labelGen() {
+    return "label_" + to_string(label_counter++);
+}
+
+string insertType(string value) {
+    regex floatRegex(R"(([0-9]+\.([0-9]+)?((e|E)(\+|\-)?[0-9]+)?)|([0-9]+(e|E)(\+|\-)?[0-9]+)|(\.[0-9]+((e|E)(\+|\-)?[0-9]+)?))");
+    regex decRegex(R"([1-9][0-9]*)");
+    regex strRegex(R"("([^(")]*)"|(`([^(`)]*)`))");
+
+    if (value == "0") {
+        return "INT";
+    } else if (regex_match(value, floatRegex)) {
+        return "FLOAT";
+    } else if (regex_match(value, decRegex)) {
+        return "INT";
+    } else if (regex_match(value, strRegex)) {
+        return "STR";
+    } else {
+        return "EXPR";
+    }
+}
+
+// Define other functions as needed
+
+int main() {
+    // Implement the main function as needed
+    return 0;
+}
+// Add the necessary include statements and namespace declarations
+
+void p_ImportDecl(const std::string& p1, const std::string& p2) {
+    // TODO: Ignoring Imports for now
+}
+
+void p_ImportSpecList() {
+    // TODO: Ignoring Imports for now
+}
+
+void p_ImportSpec(const std::string& p1, const std::string& p2) {
+    // TODO: Ignoring Imports for now
+}
+
+void p_Block(TreeNode* p3) {
+    // TODO: Handle block logic
+}
+
+void p_ScopeStart() {
+    current_scope++;
+}
+
+void p_ScopeEnd() {
+    current_scope--;
+}
+
+void p_StatementList(TreeNode* p1, TreeNode* p3) {
+    if (p3 != nullptr) {
+        p1->children.push_back(p3->data);
+        p1->TAC.append_TAC(p3->TAC);
+    }
+}
+
+void p_Statement(TreeNode* p1) {
+    // Handle different types of statements
+}
+
+void p_Declaration(TreeNode* p1) {
+    // Handle different types of declarations
+}
+
+void p_ConstDecl(const std::string& p1, TreeNode* p3) {
+    // Handle constant declaration
+}
+
+void p_ConstSpecList() {
+    // Handle constant specification list
+}
+
+void p_ConstSpecList(TreeNode* p1, TreeNode* p2) {
+    // Handle constant specification list
+}
+
+void p_ConstSpec() {
+    // Handle constant specification
+}
+
+// Define other functions as needed
+
+int main() {
+    // Implement the main function as needed
+    return 0;
+}
+// Add the necessary include statements and namespace declarations
+
+void p_ConstSpec(TreeNode* p) {
+    // Handle different const specifications
+}
+
+TreeNode* p_IdentifierList(const std::string& p1, TreeNode* p3) {
+    return new TreeNode("IdentifierList", 0, "INT", 0, {p1} + p3->children);
+}
+
+TreeNode* p_IdentifierBotList(const std::string& p1, TreeNode* p3) {
+    if (p3 == nullptr) {
+        return new TreeNode("IdentifierBotList", p1, "INT");
+    } else {
+        return new TreeNode("IdentifierBotList", 0, "INT", 0, {p1} + p3->children);
+    }
+}
+
+TreeNode* p_ExpressionList(TreeNode* p1, TreeNode* p3) {
+    TreeNode* result = new TreeNode("ExpressionList", 0, "INT", {p1->isLvalue} + p3->isLvalue, {p1} + p3->children, p1->TAC);
+    result->TAC.append_TAC(p3->TAC);
+    return result;
+}
+
+TreeNode* p_ExpressionBotList(TreeNode* p1, TreeNode* p3) {
+    if (p3 == nullptr) {
+        return new TreeNode("ExpressionBotList", 0, "INT", {p1->isLvalue}, {p1}, p1->TAC);
+    } else {
+        TreeNode* result = new TreeNode("ExpressionBotList", 0, "INT", {p1->isLvalue} + p3->isLvalue, {p1} + p3->children, p1->TAC);
+        result->TAC.append_TAC(p3->TAC);
+        return result;
+    }
+}
+
+void p_TypeDecl(TreeNode* p2) {
+    // Handle type declaration
+}
+
+void p_TypeSpecTopList(TreeNode* p1) {
+    // Handle type specification top list
+}
+
+void p_TypeSpecList() {
+    // Handle type specification list
+}
+
+void p_TypeSpec(TreeNode* p1) {
+    // Handle type specification
+}
+
+void p_AliasDecl(const std::string& p1, TreeNode* p3) {
+    // Handle alias declaration
+}
+
+void p_TypeDef(const std::string& p1, TreeNode* p2) {
+    // Handle type definition
+}
+
+TreeNode* p_Type(TreeNode* p1) {
+    if (p1 == nullptr) {
+        return nullptr;
+    }
+    return p1;
+}
+
+// Implement other functions as needed
+
+int main() {
+    // Implement the main function as needed
+    return 0;
+}
+// Add the necessary include statements and namespace declarations
+
+void p_TypeLit(TreeNode* p1) {
+    parsed.append(p1);
+}
+
+TreeNode* p_StandardType(const std::string& p1) {
+    parsed.append(p1);
+    return new TreeNode("StandardTypes", p1, "NONE");
+}
+
+void p_ArrayType(TreeNode* p2, TreeNode* p4) {
+    parsed.append(p2);
+    parsed.append(p4);
+}
+
+TreeNode* p_ArrayLength(TreeNode* p1) {
+    parsed.append(p1);
+    return p1;
+}
+
+void p_StructType(TreeNode* p3) {
+    parsed.append(p3);
+}
+
+void p_FieldDeclList() {
+    // Handle field declaration list
+}
+
+void p_FieldDeclList(TreeNode* p1, TreeNode* p2) {
+    // Handle field declaration list
+}
+
+void p_FieldDecl(TreeNode* p1, TreeNode* p2, TreeNode* p3) {
+    parsed.append(p1);
+    parsed.append(p2);
+    parsed.append(p3);
+}
+
+void p_TagTop() {
+    // Handle tag top
+}
+
+void p_TagTop(TreeNode* p1) {
+    parsed.append(p1);
+}
+
+void p_Tag(TreeNode* p1) {
+    parsed.append(p1);
+}
+
+void p_FunctionType(TreeNode* p2) {
+    parsed.append(p2);
+}
+
+void p_Signature(TreeNode* p1) {
+    parsed.append(p1);
+}
+
+void p_Signature(TreeNode* p1, TreeNode* p2) {
+    parsed.append(p1);
+    parsed.append(p2);
+}
+
+void p_Result(TreeNode* p1) {
+    parsed.append(p1);
+}
+
+void p_Result(TreeNode* p1, TreeNode* p2) {
+    parsed.append(p1);
+    parsed.append(p2);
+}
+
+void p_Parameters() {
+    // Handle parameters
+}
+
+void p_Parameters(TreeNode* p2) {
+    parsed.append(p2);
+}
+
+void p_Parameters(TreeNode* p2, TreeNode* p4) {
+    parsed.append(p2);
+    parsed.append(p4);
+}
+
+void p_ParameterList(TreeNode* p1) {
+    parsed.append(p1);
+}
+
+void p_ParameterList(TreeNode* p1, TreeNode* p3) {
+    parsed.append(p1);
+    parsed.append(p3);
+}
+
+void p_ParameterDecl(TreeNode* p1) {
+    parsed.append(p1);
+}
+// Add the necessary include statements and namespace declarations
+
+void p_VarDecl(TreeNode* p2) {
+    parsed.append(p2);
+}
+
+TreeNode* p_VarSpecTopList(TreeNode* p1) {
+    parsed.append(p1);
+    return p1;
+}
+
+void p_VarSpecList() {
+    // Handle var specification list
+}
+
+void p_VarSpecList(TreeNode* p1, TreeNode* p2) {
+    // Handle var specification list
+}
+
+void p_VarSpec(TreeNode* p1, TreeNode* p2, TreeNode* p3) {
+    // Insert into symbol table
+    parsed.append(p1);
+    parsed.append(p2);
+    parsed.append(p3);
+}
+
+void p_VarSpecMid() {
+    // Handle var spec mid
+}
+
+void p_VarSpecMid(TreeNode* p1) {
+    parsed.append(p1);
+}
+
+void p_FunctionDecl(TreeNode* p2, TreeNode* p4) {
+    parsed.append(p2);
+    parsed.append(p4);
+}
+
+void p_FunctionDecl(TreeNode* p2, TreeNode* p4, TreeNode* p5) {
+    parsed.append(p2);
+    parsed.append(p4);
+    parsed.append(p5);
+}
+
+TreeNode* p_FunctionName(const std::string& p1) {
+    return new TreeNode("FunctionName", p1, "INT");
+}
+
+TreeNode* p_FunctionBody(TreeNode* p1) {
+    p1->name = "FunctionBody";
+    return p1;
+}
+
+TreeNode* p_SimpleStmt(TreeNode* p1) {
+    parsed.append(p1);
+    return p1;
+}
+
+void p_IncDecStmt(TreeNode* p1, const std::string& p2) {
+    parsed.append(p1);
+    // Handle increment/decrement statement
+}
+
+void p_ShortVarDecl(TreeNode* p1, const std::string& p2, TreeNode* p3) {
+    global current_scope;
+    TreeNode* result = new TreeNode("ShortVarDecl", 0, "INT");
+    
+    if (p1->name == "ExpressionList") {
+        int l1 = p1->children.size();
+        int l2 = p3->children.size();
+        
+        result->TAC.append_TAC(p3->TAC);
+        result->TAC.append_TAC(p1->TAC);
+        
+        if (l1 == l2) {
+            for (int i = 0; i < l1; ++i) {
+                if (p1->children[i]->isLvalue == 0) {
+                    std::cout << "*** Error: Cannot assign to constant ***" << std::endl;
+                } else {
+                    if (SymbolTable.search_node(p1->children[i]->data).empty()) {
+                        symboltable_node* node = new symboltable_node();
+                        node->name = p1->children[i]->data;
+                        node->type = insertType(p3->children[i]->data);
+                        node->scope = current_scope;
+                        node->value = p3->children[i]->data;
+                        SymbolTable.add_node(node);
+                    }
+                    result->TAC.add_line({p2, p1->children[i]->data, p3->children[i]->data, ""});
+                }
+            }
+        } else {
+            std::cout << "*** Error: Assignment mismatch: " << l1 << " identifier(s) but " << l2 << " value(s)! ***" << std::endl;
+        }
+    } else if (p1->name == "Expression") {
+        if (p1->isLvalue == 0) {
+            std::cout << "*** Error: Cannot declare and assign to constant ***" << std::endl;
+        } else {
+            result->TAC.append_TAC(p3->TAC);
+            result->TAC.append_TAC(p1->TAC);
+            result->TAC.add_line({p2, p1->data, p3->data, ""});
+            
+            if (SymbolTable.search_node(p1->data).empty()) {
+                symboltable_node* node = new symboltable_node();
+                node->name = p1->data;
+                node->type = insertType(p3->data);
+                node->scope = current_scope;
+                node->value = p3->data;
+                SymbolTable.add_node(node);
+            }
+        }
+    }
+    
+    return result;
+}
+// Define necessary classes and functions
+
+class TreeNode {
+public:
+    std::string name;
+    std::string data;
+    std::string input_type;
+    int isLvalue;
+    std::vector<TreeNode*> children;
+    ThreeAddressCode TAC;
+
+    TreeNode(const std::string& n, const std::string& d, const std::string& t, int l, const std::vector<TreeNode*>& c)
+        : name(n), data(d), input_type(t), isLvalue(l), children(c) {}
+
+    TreeNode(const std::string& n, const std::string& d, const std::string& t, int l)
+        : TreeNode(n, d, t, l, {}) {}
+
+    TreeNode(const std::string& n, const std::string& d, const std::string& t)
+        : TreeNode(n, d, t, 0) {}
+};
+
+class ThreeAddressCode {
+public:
+    std::vector<std::vector<std::string>> code;
+    std::vector<int> leaders;
+
+    void add_line(const std::vector<std::string>& line) {
+        code.push_back(line);
+    }
+
+    void add_leader(int leader) {
+        leaders.push_back(leader);
+    }
+
+    int length() const {
+        return code.size();
+    }
+
+    // Add other necessary methods
+};
+
+class SymbolTable {
+public:
+    // Define symbol table methods
+};
+
+// Define other necessary functions
+
+// C++ code for the provided Python functions
+void p_VarDecl(TreeNode* p2) {
+    parsed.push_back(p2);
+}
+
+TreeNode* p_VarSpecTopList(TreeNode* p1) {
+    parsed.push_back(p1);
+    return p1;
+}
+
+void p_VarSpecList() {
+    // Handle var specification list
+}
+
+void p_VarSpecList(TreeNode* p1, TreeNode* p2) {
+    // Handle var specification list
+}
+
+void p_VarSpec(TreeNode* p1, TreeNode* p2, TreeNode* p3) {
+    // Insert into symbol table
+    parsed.push_back(p1);
+    parsed.push_back(p2);
+    parsed.push_back(p3);
+}
+
+void p_VarSpecMid() {
+    // Handle var spec mid
+}
+
+void p_VarSpecMid(TreeNode* p1) {
+    parsed.push_back(p1);
+}
+
+void p_FunctionDecl(TreeNode* p2, TreeNode* p4) {
+    parsed.push_back(p2);
+    parsed.push_back(p4);
+}
+
+void p_FunctionDecl(TreeNode* p2, TreeNode* p4, TreeNode* p5) {
+    parsed.push_back(p2);
+    parsed.push_back(p4);
+    parsed.push_back(p5);
+}
+
+// Implement the rest of the functions similarly
+
+int main() {
+    // Replace with your parser logic
+    return 0;
+}
+#include <iostream>
+#include <vector>
+#include <string>
+
+class TreeNode {
+public:
+    std::string name;
+    std::string data;
+    std::string input_type;
+    int isLvalue;
+    std::vector<TreeNode*> children;
+
+    TreeNode(const std::string& n, const std::string& d, const std::string& t, int l, const std::vector<TreeNode*>& c)
+        : name(n), data(d), input_type(t), isLvalue(l), children(c) {}
+
+    TreeNode(const std::string& n, const std::string& d, const std::string& t)
+        : TreeNode(n, d, t, 0, {}) {}
+};
+
+class ThreeAddressCode {
+public:
+    std::vector<std::vector<std::string>> code;
+    std::vector<int> leaders;
+
+    void add_line(const std::vector<std::string>& line) {
+        code.push_back(line);
+    }
+
+    void add_leader(int leader) {
+        leaders.push_back(leader);
+    }
+
+    int length() const {
+        return code.size();
+    }
+};
+
+namespace logging {
+    void basicConfig() {
+        // Implement basicConfig
+    }
+
+    class Logger {
+    public:
+        Logger(const std::string& filename) {
+            // Implement Logger constructor
+        }
+
+        void debug(const std::string& message) {
+            // Implement debug
+        }
+    };
+
+    Logger getLogger() {
+        // Implement getLogger
+    }
+}
+
+class SymbolTable {
+public:
+    // Define symbol table methods
+};
+
+void p_Operand(TreeNode*& p0, TreeNode*& p1) {
+    if (p1 == nullptr) {
+        p0 = p1;
+    } else {
+        p0 = p1;
+    }
+    p0->name = "Operand";
+}
+
+void p_Literal(TreeNode*& p0, TreeNode*& p1, TreeNode*& p2) {
+    if (p1->name == "BasicLit") {
+        p0 = p1;
+    } else if (p1->name == "FunctionLit") {
+        p0;  // TODO: FunctionLit
+    }
+    p0->name = "Literal";
+}
+
+void p_BasicLit(TreeNode*& p0, TreeNode*& p1) {
+    p0 = p1;
+    p0->name = "BasicLit";
+}
+
+void p_int_lit(TreeNode*& p0, TreeNode*& p1) {
+    p0 = p1;
+    p0->name = "int_lit";
+}
+
+void p_decimal_lit(TreeNode*& p0, const std::string& p1) {
+    p0 = new TreeNode("decimal_lit", p1, "INT");
+}
+
+void p_octal_lit(TreeNode*& p0, const std::string& p1) {
+    p0 = new TreeNode("octal_lit", p1, "OCT");
+}
+
+void p_hex_lit(TreeNode*& p0, const std::string& p1) {
+    p0 = new TreeNode("hex_lit", p1, "HEX");
+}
+
+void p_float_lit(TreeNode*& p0, const std::string& p1) {
+    p0 = new TreeNode("float_lit", p1, "FLOAT");
+}
+
+void p_FunctionLit(TreeNode*& p0, TreeNode*& p1, TreeNode*& p2) {
+    // TODO: FunctionLit
+    // parsed.append(p.slice);
+}
+
+void p_Selector() {
+    // Handle Selector
+    // parsed.append(p.slice);
+}
+
+void p_Index() {
+    // Handle Index
+    // parsed.append(p.slice);
+}
+
+void p_Arguments(TreeNode*& p0, TreeNode*& p1, TreeNode*& p2, TreeNode*& p3) {
+    if (p1 == nullptr && p2 == nullptr) {
+        p0 = new TreeNode("Arguments", 0, "INT");
+    }
+    // Handle Arguments
+    // parsed.append(p.slice);
+}
+
+void p_empty() {
+    // Handle empty production
+}
+
+void p_string_lit(TreeNode*& p0, const std::string& p1) {
+    p0 = new TreeNode("string_lit", p1, "STRING");
+}
+
+void p_error(const std::string& message) {
+    if (message.empty()) {
+        std::cout << "You missed something at the end" << std::endl;
+    } else {
+        std::cout << "SYNTAX ERROR: " << message << std::endl;
+    }
+}
+
+int main(int argc, char* argv[]) {
+    logging::basicConfig();
+    auto log = logging::getLogger();
+
+    if (argc < 2) {
+        std::cout << "Please provide a valid file path!" << std::endl;
+        return -1;
+    }
+
+    const std::string filename(argv[1]);
+    // Read the file content into 'inp'
+
+    // Replace the following with your parser logic
+    TreeNode* p0 = nullptr;
+    TreeNode* p1 = nullptr;
+    TreeNode* p2 = nullptr;
+    TreeNode* p3 = nullptr;
+
+    p_Operand(p0, p1);
+    p_Literal(p0, p1, p2);
+    p_BasicLit(p0, p1);
+    p_int_lit(p0, p1);
+    p_decimal_lit(p0, "123");  // Replace with the actual value
+    p_octal_lit(p0, "075");    // Replace with the actual value
+    p_hex_lit(p0, "0x1A");     // Replace with the actual value
+    p_float_lit(p0, "3.14");   // Replace with the actual value
+    p_FunctionLit(p0, p1, p2);
+    p_Selector();
+    p_Index();
+    p_Arguments(p0, p1, p2, p3);
+    p_empty();
+    p_string_lit(p0, "Hello");  // Replace with the actual value
+
+    return 0;
+}
