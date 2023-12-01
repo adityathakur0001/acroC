@@ -1,0 +1,96 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+class Code {
+public:
+    std::vector<std::string> code;
+
+    Code() {}
+
+    void add_line(const std::string& line) {
+        code.push_back(line);
+    }
+
+    void print_code() {
+        for (size_t i = 0; i < code.size(); ++i) {
+            std::cout << code[i] << std::endl;
+        }
+    }
+
+    size_t length() {
+        return code.size();
+    }
+};
+
+class ThreeAddressCode : public Code {
+public:
+    std::vector<int> leaders;
+
+    ThreeAddressCode() : Code() {}
+
+    void add_leader(int leader) {
+        if (std::find(leaders.begin(), leaders.end(), leader) == leaders.end()) {
+            leaders.push_back(leader);
+        }
+    }
+
+    void append_TAC(const ThreeAddressCode& tac) {
+        for (size_t i = 0; i < tac.length(); ++i) {
+            add_line(tac.code[i]);
+        }
+        leaders.insert(leaders.end(), tac.leaders.begin(), tac.leaders.end());
+    }
+};
+
+class TreeNode {
+public:
+    std::string name;
+    std::string data;
+    std::string input_type;
+    int isLvalue;
+    std::vector<TreeNode> children;
+    ThreeAddressCode TAC;
+
+    TreeNode(const std::string& name, const std::string& data, const std::string& input_type, int isLvalue = 0)
+        : name(name), data(data), input_type(input_type), isLvalue(isLvalue) {}
+
+    void print_node() {
+        std::cout << "Name: " << name << " Data: " << data << " Type: " << input_type << " Is L-Value? " << isLvalue << std::endl;
+
+        if (TAC.length() != 0) {
+            std::cout << "Three Address Code: " << std::endl;
+            TAC.print_code();
+        }
+    }
+};
+
+int main() {
+    // Example usage
+    Code code;
+    code.add_line("int main() {");
+    code.add_line("    return 0;");
+    code.add_line("}");
+
+    code.print_code();
+
+    ThreeAddressCode tac;
+    tac.add_line("t1 = a + b");
+    tac.add_line("t2 = t1 * c");
+    tac.add_leader(1);
+    tac.add_leader(3);
+
+    tac.print_code();
+    std::cout << "Leaders: ";
+    for (size_t i = 0; i < tac.leaders.size(); ++i) {
+        std::cout << tac.leaders[i] << " ";
+    }
+    std::cout << std::endl;
+
+    TreeNode treeNode("Node1", "Data1", "Type1", 1);
+    treeNode.TAC = tac;
+
+    treeNode.print_node();
+
+    return 0;
+}
