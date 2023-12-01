@@ -1,0 +1,196 @@
+#include <iostream>
+#include <vector>
+#include <string>
+
+class TreeNode {
+public:
+    std::string name;
+    std::string data;
+    std::string input_type;
+    int isLvalue;
+    std::vector<TreeNode*> children;
+
+    TreeNode(const std::string& n, const std::string& d, const std::string& t, int l, const std::vector<TreeNode*>& c)
+        : name(n), data(d), input_type(t), isLvalue(l), children(c) {}
+
+    TreeNode(const std::string& n, const std::string& d, const std::string& t)
+        : TreeNode(n, d, t, 0, {}) {}
+};
+
+class ThreeAddressCode {
+public:
+    std::vector<std::vector<std::string>> code;
+    std::vector<int> leaders;
+
+    void add_line(const std::vector<std::string>& line) {
+        code.push_back(line);
+    }
+
+    void add_leader(int leader) {
+        leaders.push_back(leader);
+    }
+
+    int length() const {
+        return code.size();
+    }
+
+    void print_code() const {
+        for (const auto& line : code) {
+            for (const auto& token : line) {
+                std::cout << token << " ";
+            }
+            std::cout << std::endl;
+        }
+    }
+};
+
+class SymbolTable {
+public:
+    // Define symbol table methods
+};
+
+std::vector<int> get_all_stmt_lhs(const ThreeAddressCode& three_addr_code, const std::string& name) {
+    std::vector<int> stmts;
+    for (int idx = 0; idx < three_addr_code.length(); ++idx) {
+        const auto& line = three_addr_code.code[idx];
+        if (line.size() == 4 && line[1] == name) {
+            stmts.push_back(idx);
+        }
+    }
+    return stmts;
+}
+
+std::vector<int> get_all_assignments(const ThreeAddressCode& three_addr_code, const std::string& name) {
+    std::vector<int> stmts;
+    for (int idx = 0; idx < three_addr_code.length(); ++idx) {
+        const auto& line = three_addr_code.code[idx];
+        if ((line[0] == "=" || line[0] == ":=") && line[2] == name && line[3].empty()) {
+            stmts.push_back(idx);
+        }
+    }
+    return stmts;
+}
+
+ThreeAddressCode pack_temps(SymbolTable& symbol_table, ThreeAddressCode& three_addr_code) {
+    std::vector<std::vector<std::string>> code = three_addr_code.code;
+    std::vector<int> remove;
+
+    for (const auto& row : symbol_table.symbol_table) {
+        std::vector<int> stmts = get_all_stmt_lhs(three_addr_code, row.name);
+        std::vector<int> assignments = get_all_assignments(three_addr_code, row.name);
+
+        try {
+            if (row.name.rfind("temp_", 0) == 0) {
+                std::string final_name = code[assignments[0]][1];
+                three_addr_code.code[stmts[0]][1] = final_name;
+                remove.insert(remove.end(), assignments.begin(), assignments.end());
+            }
+        } catch (...) {
+            continue;
+        }
+    }
+
+    int n = three_addr_code.length();
+    three_addr_code.code = {};
+    for (int i = 0; i < n; ++i) {
+        if (std::find(remove.begin(), remove.end(), i) == remove.end()) {
+            three_addr_code.code.push_back(code[i]);
+        }
+    }
+
+    return three_addr_code;
+}
+
+bool check_line_expr(const std::vector<std::string>& line) {
+    bool l1_flag = line[0] != "goto" && line[0] != "break" && line[0] != "continue";
+    bool l2_flag = line.size() == 4;
+    return l1_flag || l2_flag;
+}
+
+ThreeAddressCode common_subexpr_eliminate(ThreeAddressCode& three_addr_code) {
+    std::vector<std::vector<std::string>> c = three_addr_code.code;
+    std::vector<int> to_remove;
+
+    for (const auto& line : c) {
+        int line_count = std::count(c.begin(), c.end(), line);
+
+        if (line_count > 1) {
+            std::vector<int> indices;
+            for (int i = 0; i < c.size(); ++i) {
+                if (c[i] == line && (c[i][0] == "+" || c[i][0] == "-" || c[i][0] == "*" || c[i][0] == "/" || c[i][0] == ":=" || c[i][0] == "=")) {
+                    indices.push_back(i);
+                }
+            }
+            to_remove.insert(to_remove.end(), indices.begin() + 1, indices.end());
+        }
+    }
+
+    to_remove.erase(std::unique(to_remove.begin(), to_remove.end()), to_remove.end());
+
+    int n = c.size();
+    three_addr_code.code = {};
+    for (int i = 0; i < n; ++i) {
+        if (std::find(to_remove.begin(), to_remove.end(), i) == to_remove.end()) {
+            three_addr_code.code.push_back(c[i]);
+        }
+    }
+
+    return three_addr_code;
+}
+
+ThreeAddressCode constant_folding(ThreeAddressCode& three_addr_code, SymbolTable& symbol_table) {
+    std::vector<int> to_remove;
+
+    for (int idx = 0; idx < three_addr_code.length(); ++idx) {
+        const auto& line = three_addr_code.code[idx];
+
+        if (line.size() == 4) {
+            TreeNode* node1 = symbol_table.search_node(line[2]);
+            TreeNode* node2 = symbol_table.search_node(line[3]);
+
+            if (node1) {
+                three_addr_code.code[idx][2] = node1->value;
+                std::vector<int> lhs_stmts = get_all_stmt_lhs(three_addr_code, node1->name);
+                to_remove.insert(to_remove.end(), lhs_stmts.begin(), lhs_stmts.end());
+            }
+
+            if (node2) {
+                three_addr_code.code[idx][3] = node2->value;
+                std::vector<int> rhs_stmts = get_all_stmt_lhs(three_addr_code, node2->name);
+                to_remove.insert(to_remove.end(), rhs_stmts.begin(), rhs_stmts.end());
+            }
+        }
+    }
+
+    to_remove.erase(std::unique(to_remove.begin(), to_remove.end()), to_remove.end());
+
+    int n = three_addr_code.length();
+    three_addr_code.code = {};
+    for (int i = 0; i < n; ++i) {
+        if (std::find(to_remove.begin(), to_remove.end(), i) == to_remove.end()) {
+            three_addr_code.code.push_back(three_addr_code.code[i]);
+        }
+    }
+
+    return three_addr_code;
+}
+
+ThreeAddressCode optimize_tac(SymbolTable& symbol_table, ThreeAddressCode& three_addr_code) {
+    three_addr_code = common_subexpr_eliminate(three_addr_code);
+    std::cout << "\nAFTER COMMON SUBEXPRESSION ELIMINATION:\n";
+    three_addr_code.print_code();
+    three_addr_code = constant_folding(three_addr_code, symbol_table);
+    std::cout << "\nAFTER CONSTANT FOLDING:\n";
+    three_addr_code.print_code();
+    return three_addr_code;
+}
+
+int main() {
+    // Replace this part with the actual initialization of SymbolTable and ThreeAddressCode
+    SymbolTable symbol_table;
+    ThreeAddressCode three_addr_code;
+
+    three_addr_code = optimize_tac(symbol_table, three_addr_code);
+
+    return 0;
+}
