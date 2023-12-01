@@ -1,0 +1,81 @@
+#include <iostream>
+#include <vector>
+
+class SymbolTableNode {
+public:
+    std::string name;
+    std::string type;
+    int scope;
+    int value;
+    // Assuming expr and exprnode have appropriate types in your actual use case
+    // Replace "exprType" and "ExprNodeType" with the actual types
+    exprType expr;
+    ExprNodeType exprnode;
+};
+
+class SymbolTable {
+public:
+    std::vector<SymbolTableNode> symbolTable;
+
+    void printSymbolTable() {
+        std::cout << "\nSYMBOL TABLE\n";
+        std::cout << "NAME  |  TYPE  |  SCOPE  |  VALUE  |  EXPR\n--------------------------------------------------\n";
+        for (const auto &entry : symbolTable) {
+            std::cout << entry.name << "\t" << entry.type << "\t" << entry.scope << "\t" << entry.value << "\t" << entry.expr << "\n";
+        }
+    }
+
+    bool addNode(SymbolTableNode symbolTableNode) {
+        const std::string &name = symbolTableNode.name;
+        for (const auto &stNode : symbolTable) {
+            if (stNode.name == name) {
+                return false;
+            }
+        }
+        symbolTable.push_back(symbolTableNode);
+        return true;
+    }
+
+    SymbolTableNode searchNode(const std::string &name) {
+        for (const auto &stNode : symbolTable) {
+            if (stNode.name == name) {
+                return stNode;
+            }
+        }
+        return SymbolTableNode(); // Return an empty node if not found (you might want to handle this case appropriately)
+    }
+
+    SymbolTableNode searchExpr(const exprType &expr) {
+        for (const auto &stNode : symbolTable) {
+            if (stNode.expr == expr) {
+                return stNode;
+            }
+        }
+        return SymbolTableNode(); // Return an empty node if not found (you might want to handle this case appropriately)
+    }
+};
+
+int main() {
+    // Example usage:
+    SymbolTable symbolTable;
+
+    SymbolTableNode node1;
+    node1.name = "var1";
+    node1.type = "int";
+    node1.scope = 1;
+    node1.value = 42;
+
+    symbolTable.addNode(node1);
+
+    SymbolTableNode node2;
+    node2.name = "var2";
+    node2.type = "float";
+    node2.scope = 2;
+    node2.value = 3.14;
+
+    symbolTable.addNode(node2);
+
+    symbolTable.printSymbolTable();
+
+    return 0;
+}
