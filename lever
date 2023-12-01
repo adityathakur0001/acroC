@@ -1,0 +1,188 @@
+%{
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+using namespace std;
+
+int lineno = 1;
+
+bool semimode = false;
+
+void setSemiMode() {
+    semimode = (yytext[0] == '\n');
+}
+
+void invalidIdentError(const string& value) {
+    cerr << "LEXICAL ERROR: Invalid Identifier '" << value << "' on line " << lineno << endl;
+    exit(EXIT_FAILURE);
+}
+%}
+
+%option noyywrap
+
+%{
+// C++ includes and code for predefined types
+#include <unordered_map>
+std::unordered_map<std::string, std::string> reserved_keywords = {
+    {"nil", "NIL"},
+    {"default", "DEFAULT"},
+    {"func", "FUNC"},
+    {"select", "SELECT"},
+    {"case", "CASE"},
+    {"go", "GO"},
+    {"struct", "STRUCT"},
+    {"else", "ELSE"},
+    {"goto", "GOTO"},
+    {"package", "PACKAGE"},
+    {"switch", "SWITCH"},
+    {"const", "CONST"},
+    {"if", "IF"},
+    {"type", "TYPE"},
+    {"for", "FOR"},
+    {"import", "IMPORT"},
+    {"var", "VAR"},
+    {"true", "TRUE"},
+    {"false", "FALSE"}
+};
+
+// C++ equivalent for the tokens
+#define PLUS 258
+#define MINUS 259
+#define STAR 260
+#define DIVIDE 261
+#define MODULO 262
+#define AMP 263
+#define OR 264
+#define CARET 265
+#define LS 266
+#define RS 267
+#define AND_OR 268
+#define PLUS_EQ 269
+#define MINUS_EQ 270
+#define STAR_EQ 271
+#define DIVIDE_EQ 272
+#define MODULO_EQ 273
+#define AMP_EQ 274
+#define OR_EQ 275
+#define CARET_EQ 276
+#define LS_EQ 277
+#define RS_EQ 278
+#define AND_OR_EQ 279
+#define AMP_AMP 280
+#define OR_OR 281
+#define LT_MINUS 282
+#define PLUS_PLUS 283
+#define MINUS_MINUS 284
+#define EQ_EQ 285
+#define LT 286
+#define GT 287
+#define EQ 288
+#define NOT 289
+#define NOT_EQ 290
+#define LT_EQ 291
+#define GT_EQ 292
+#define ASSIGN_OP 293
+#define LSQUARE 294
+#define RSQUARE 295
+#define LROUND 296
+#define RROUND 297
+#define LCURLY 298
+#define RCURLY 299
+#define COMMA 300
+#define DDD 301
+#define DOT 302
+#define SEMICOLON 303
+#define COLON 304
+#define SINGLE_QUOTES 305
+#define DOUBLE_QUOTES 306
+#define DECIMAL_LIT 307
+#define OCTAL_LIT 308
+#define HEX_LIT 309
+#define FLOAT_LIT 310
+#define STRING_LIT 311
+#define NEWLINE 312
+#define IDENTIFIER 313
+#define PREDEF_TYPE 314
+#define BREAK 315
+#define CONTINUE 316
+#define RETURN 317
+#define invalidIdent 318
+%}
+
+%%
+(\+\+)                  { setSemiMode(); return PLUS_PLUS; }
+(--)([ \t\f\v]*)          { setSemiMode(); return MINUS_MINUS; }
+(<<=)                   { setSemiMode(); return LS_EQ; }
+(>>=)                   { setSemiMode(); return RS_EQ; }
+(&\^=)                  { setSemiMode(); return AND_OR_EQ; }
+(<<)                    { setSemiMode(); return LS; }
+(>>)                    { setSemiMode(); return RS; }
+(&\^)                   { setSemiMode(); return AND_OR; }
+(\+=)                   { setSemiMode(); return PLUS_EQ; }
+(-=)                   { setSemiMode(); return MINUS_EQ; }
+(\*=)                  { setSemiMode(); return STAR_EQ; }
+(/=)                   { setSemiMode(); return DIVIDE_EQ; }
+(%=)                   { setSemiMode(); return MODULO_EQ; }
+(&=)                   { setSemiMode(); return AMP_EQ; }
+(\|=)                  { setSemiMode(); return OR_EQ; }
+(\^=)                  { setSemiMode(); return CARET_EQ; }
+(&&)                   { setSemiMode(); return AMP_AMP; }
+(\|\|)                 { setSemiMode(); return OR_OR; }
+(<-)                   { setSemiMode(); return LT_MINUS; }
+(==)                   { setSemiMode(); return EQ_EQ; }
+(!=)                   { setSemiMode(); return NOT_EQ; }
+(!)                    { setSemiMode(); return NOT; }
+(<=)                   { setSemiMode(); return LT_EQ; }
+(>=)                   { setSemiMode(); return GT_EQ; }
+(:=)                   { setSemiMode(); return ASSIGN_OP; }
+(\[)                   { setSemiMode(); return LSQUARE; }
+(\()                   { setSemiMode(); return LROUND; }
+(\{)                   { setSemiMode(); return LCURLY; }
+(,)                    { setSemiMode(); return COMMA; }
+(\.\.\.)               { setSemiMode(); return DDD; }
+(\.)                   { setSemiMode(); return DOT; }
+(;)                    { setSemiMode(); return SEMICOLON; }
+(:)                    { setSemiMode(); return COLON; }
+(\")([^\"]*)(\")       { setSemiMode(); return STRING_LIT; }
+(\'[^\']*\')           { setSemiMode(); return SINGLE_QUOTES; }
+(0[xX][0-9A-Fa-f]+)    { setSemiMode(); return HEX_LIT; }
+(([0-9]+\.[0-9]*([eE][-+]?[0-9]+)?)|([0-9]+([eE][-+]?[0-9]+)?)) {
+                        setSemiMode(); return FLOAT_LIT; }
+(0[0-7]*)              { setSemiMode(); return OCTAL_LIT; }
+([1-9][0-9]*)          { setSemiMode(); return DECIMAL_LIT; }
+(\})                   { setSemiMode(); return RCURLY; }
+(\))                   { setSemiMode(); return RROUND; }
+(\])                   { setSemiMode(); return RSQUARE; }
+([ \t\f\v]*\n)         { setSemiMode(); return NEWLINE; }
+([a-zA-Z_@][a-zA-Z_0-9]*) {
+                        setSemiMode();
+                        auto it = reserved_keywords.find(yytext);
+                        if (it != reserved_keywords.end())
+                            return it->second;
+                        else
+                            return IDENTIFIER;
+                    }
+([ \t\f\v]+)           {/* Ignore whitespace */}
+[0-9][a-zA-Z_]+         { invalidIdentError(yytext); }
+
+%%
+int main(int argc, char** argv) {
+    if (argc < 2) {
+        cout << "Please provide a valid file path!" << endl;
+        return EXIT_FAILURE;
+    }
+
+    string input_file = argv[1];
+    ifstream input_stream(input_file);
+    if (!input_stream.is_open()) {
+        cout << "Input file " << input_file << " does not exist" << endl;
+        return EXIT_FAILURE;
+    }
+
+    // Lexical analysis
+    yyin = &input_stream;
+    yylex();
+
+    return EXIT_SUCCESS;
+}
